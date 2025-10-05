@@ -1,0 +1,5 @@
+{
+  "name": "Quantum Key Distribution Simulator",
+  "description": "An interactive and visual simulator for teaching and experimenting with Quantum Key Distribution (QKD) protocols like BB84. Users can adjust parameters such as basis selection, eavesdropping rates, and quantum channel errors, and receive detailed analysis and visualizations powered by an LLM.",
+  "requestFramePermissions": []
+}
