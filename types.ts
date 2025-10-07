@@ -1,4 +1,5 @@
 export type Protocol = 'BB84' | 'E91';
+export type NoiseModel = 'SimpleQBER' | 'Depolarizing';
 
 export enum Basis {
   Rectilinear = '+',
@@ -37,6 +38,8 @@ export interface Qubit {
 export interface SimulationParams {
   protocol: Protocol;
   qubitCount: number;
+  runCount: number;
+  noiseModel: NoiseModel;
   rectilinearBasisPercent: number;
   eavesdropPercent: number;
   qberPercent: number;
@@ -48,6 +51,16 @@ export interface SimulationResult {
   finalKeyLength: number;
   measuredQBER: number;
 }
+
+export interface AggregatedSimulationResult {
+  totalRuns: number;
+  avgSiftedKeyLength: number;
+  avgFinalKeyLength: number;
+  avgMeasuredQBER: number;
+  finalKeyRate: number; // Final key bits per initial qubit
+  lastRun: SimulationResult; // To display in the detailed view
+}
+
 
 export interface EducationalContent {
   prerequisites: string;

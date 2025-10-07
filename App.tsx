@@ -2,9 +2,10 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { ControlPanel } from './components/ControlPanel';
 import { SimulationView } from './components/SimulationView';
 import { AnalysisPanel } from './components/AnalysisPanel';
+import { ResultsSummary } from './components/ResultsSummary';
 import { analyzeSimulation, getEducationalContent } from './services/geminiService';
 import { Basis, Bit } from './types';
-import type { SimulationParams, SimulationResult, Qubit, LLMAnalysis } from './types';
+import type { SimulationParams, SimulationResult, Qubit, LLMAnalysis, AggregatedSimulationResult } from './types';
 
 const runBB84Simulation = (params: SimulationParams): SimulationResult => {
   const qubits: Qubit[] = [];
@@ -27,15 +28,26 @@ const runBB84Simulation = (params: SimulationParams): SimulationResult => {
       qubitState.basis = eveBasis;
     }
     
-    const channelError = Math.random() * 100 < params.qberPercent;
-    if (channelError) {
-      qubitState.bit = qubitState.bit === Bit.Zero ? Bit.One : Bit.Zero;
-    }
-
+    const noiseEventHappened = Math.random() * 100 < params.qberPercent;
     const bobBasis = Math.random() < 0.5 ? Basis.Rectilinear : Basis.Diagonal;
-    let bobBit = qubitState.bit;
-    if (qubitState.basis !== bobBasis) {
+    let bobBit: Bit;
+
+    if (noiseEventHappened && params.noiseModel === 'Depolarizing') {
+      // A depolarized qubit gives a random result in ANY basis for Bob.
       bobBit = Math.random() < 0.5 ? Bit.Zero : Bit.One;
+    } else {
+      // Handle potential bit-flip from SimpleQBER model first.
+      let bitBeforeBobMeasurement = qubitState.bit;
+      if (noiseEventHappened && params.noiseModel === 'SimpleQBER') {
+        bitBeforeBobMeasurement = bitBeforeBobMeasurement === Bit.Zero ? Bit.One : Bit.Zero;
+      }
+
+      // Then, apply Bob's measurement logic based on bases.
+      if (qubitState.basis === bobBasis) {
+        bobBit = bitBeforeBobMeasurement;
+      } else {
+        bobBit = Math.random() < 0.5 ? Bit.Zero : Bit.One;
+      }
     }
     
     qubits.push({
@@ -45,7 +57,7 @@ const runBB84Simulation = (params: SimulationParams): SimulationResult => {
       eveInterfered,
       eveBasis,
       eveBit,
-      channelError,
+      channelError: noiseEventHappened,
       bobBasis,
       bobBit,
       basisMatch: aliceBasis === bobBasis,
@@ -86,9 +98,14 @@ const runE91Simulation = (params: SimulationParams): SimulationResult => {
           bobMeasurementResult = Math.random() < 0.5 ? Bit.Zero : Bit.One;
       }
       
-      const channelError = Math.random() * 100 < params.qberPercent;
-      if (channelError) {
+      const noiseEventHappened = Math.random() * 100 < params.qberPercent;
+      if (noiseEventHappened) {
+        if (params.noiseModel === 'Depolarizing') {
+          // Depolarizing channel randomizes Bob's measurement outcome
+          bobMeasurementResult = Math.random() < 0.5 ? Bit.Zero : Bit.One;
+        } else { // SimpleQBER
           bobMeasurementResult = bobMeasurementResult === Bit.Zero ? Bit.One : Bit.Zero;
+        }
       }
       
       qubits.push({
@@ -96,7 +113,7 @@ const runE91Simulation = (params: SimulationParams): SimulationResult => {
           aliceBit: aliceMeasurementResult,
           aliceBasis,
           eveInterfered,
-          channelError,
+          channelError: noiseEventHappened,
           bobBasis,
           bobBit: bobMeasurementResult,
           basisMatch,
@@ -121,12 +138,14 @@ const runE91Simulation = (params: SimulationParams): SimulationResult => {
 const App: React.FC = () => {
   const [params, setParams] = useState<SimulationParams>({
     protocol: 'BB84',
-    qubitCount: 100,
+    qubitCount: 200,
+    runCount: 1,
+    noiseModel: 'SimpleQBER',
     rectilinearBasisPercent: 50,
     eavesdropPercent: 20,
     qberPercent: 2,
   });
-  const [result, setResult] = useState<SimulationResult | null>(null);
+  const [aggregatedResult, setAggregatedResult] = useState<AggregatedSimulationResult | null>(null);
   const [analysis, setAnalysis] = useState<LLMAnalysis | null>(null);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [isTutorialLoading, setIsTutorialLoading] = useState<boolean>(true);
@@ -134,6 +153,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchTutorial = async () => {
       setIsTutorialLoading(true);
+      setAnalysis(null); // Clear previous analysis
       const content = await getEducationalContent(params.protocol);
       if (content) {
         setAnalysis(prev => ({
@@ -151,14 +171,42 @@ const App: React.FC = () => {
 
   const handleStart = useCallback(async () => {
     setIsSimulating(true);
+    setAggregatedResult(null);
+
+    const runSimulation = params.protocol === 'BB84' ? runBB84Simulation : runE91Simulation;
+    let totalSiftedKey = 0;
+    let totalFinalKey = 0;
+    let totalQBER = 0;
+    let lastRunResult: SimulationResult | null = null;
+
+    for (let i = 0; i < params.runCount; i++) {
+        const result = runSimulation(params);
+        totalSiftedKey += result.siftedKeyLength;
+        totalFinalKey += result.finalKeyLength;
+        totalQBER += result.measuredQBER;
+        if (i === params.runCount - 1) {
+            lastRunResult = result;
+        }
+    }
+
+    if (!lastRunResult) {
+      setIsSimulating(false);
+      return;
+    }
+
+    const aggResult: AggregatedSimulationResult = {
+      totalRuns: params.runCount,
+      avgSiftedKeyLength: totalSiftedKey / params.runCount,
+      avgFinalKeyLength: totalFinalKey / params.runCount,
+      avgMeasuredQBER: totalQBER / params.runCount,
+      finalKeyRate: (totalFinalKey / params.runCount) / params.qubitCount,
+      lastRun: lastRunResult,
+    };
+
+    setAggregatedResult(aggResult);
     
-    const simulationResult = params.protocol === 'BB84' 
-      ? runBB84Simulation(params)
-      : runE91Simulation(params);
-      
-    setResult(simulationResult);
-    
-    const llmAnalysis = await analyzeSimulation(params.protocol, params, simulationResult);
+    // Use the last run's result for LLM analysis for simplicity
+    const llmAnalysis = await analyzeSimulation(params.protocol, params, lastRunResult);
     setAnalysis(prev => ({
         ...prev,
         textual: llmAnalysis.textual,
@@ -185,22 +233,25 @@ const App: React.FC = () => {
             <ControlPanel params={params} setParams={setParams} onStart={handleStart} isLoading={isSimulating} />
           </aside>
           
-          <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <section>
-              <h2 className="text-2xl font-semibold mb-4 text-white">نمایش فرآیند شبیه‌سازی</h2>
-              <SimulationView result={result} protocol={params.protocol} />
-            </section>
-            
-            <section>
-              <h2 className="text-2xl font-semibold mb-4 text-white">تحلیل و آموزش</h2>
-              <AnalysisPanel 
-                analysis={analysis} 
-                isLoading={isSimulating} 
-                isTutorialLoading={isTutorialLoading}
-                params={params} 
-                result={result} 
-              />
-            </section>
+          <div className="lg:col-span-9 space-y-8">
+            {aggregatedResult && <ResultsSummary result={aggregatedResult} />}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <section>
+                <h2 className="text-2xl font-semibold mb-4 text-white">نمایش فرآیند شبیه‌سازی (آخرین اجرا)</h2>
+                <SimulationView result={aggregatedResult?.lastRun ?? null} protocol={params.protocol} />
+                </section>
+                
+                <section>
+                <h2 className="text-2xl font-semibold mb-4 text-white">تحلیل و آموزش</h2>
+                <AnalysisPanel 
+                    analysis={analysis} 
+                    isLoading={isSimulating} 
+                    isTutorialLoading={isTutorialLoading}
+                    params={params} 
+                    result={aggregatedResult?.lastRun ?? null} 
+                />
+                </section>
+            </div>
           </div>
         </main>
       </div>

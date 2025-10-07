@@ -13,7 +13,8 @@ const getBB84Prompt = (params: SimulationParams, result: SimulationResult) => `
   - تعداد کل کیوبیت‌های ارسالی: ${params.qubitCount}
   - درصد استفاده از مبنای Rectilinear (+): ${params.rectilinearBasisPercent}%
   - درصد استراق سمع توسط Eve: ${params.eavesdropPercent}%
-  - نرخ خطای ذاتی کانال (QBER): ${params.qberPercent}%
+  - مدل نویز کانال: ${params.noiseModel === 'Depolarizing' ? 'کانال دپلاریزه' : 'خطای ساده (Bit-Flip)'}
+  - ${params.noiseModel === 'Depolarizing' ? 'احتمال دپلاریزه شدن' : 'نرخ خطای ذاتی کانال (QBER)'}: ${params.qberPercent}%
 
   **Simulation Results:**
   - طول کلید غربال شده (Sifted Key): ${result.siftedKeyLength}
@@ -25,7 +26,9 @@ const getBB84Prompt = (params: SimulationParams, result: SimulationResult) => `
   1.  **تحلیل متنی (Textual Analysis):**
       - Provide a step-by-step explanation of what happened in this BB84 simulation. Use Markdown for formatting.
       - Explain why the sifted key length is approximately 50% of the initial qubit count.
-      - Analyze the "Measured QBER". Explain how Eve's eavesdropping directly caused the increase in the error rate. If the measured QBER is high (> 11-15%), explain that Alice and Bob would detect Eve and abort.
+      - Analyze the "Measured QBER". Explain how Eve's eavesdropping and the channel noise model contributed to the error rate.
+      - Based on the selected noise model (${params.noiseModel}), explain its physical meaning. If it's "Depolarizing", contrast it with the simpler "SimpleQBER" (Bit-Flip) model and discuss why it might be a more realistic simulation of environmental decoherence.
+      - If the measured QBER is high (> 11-15%), explain that Alice and Bob would detect Eve and abort.
       - Discuss the security of the final key.
       - Enclose any mathematical formulas in LaTeX syntax ($...$ or $$...$$).
 
@@ -47,7 +50,8 @@ const getE91Prompt = (params: SimulationParams, result: SimulationResult) => `
   - تعداد جفت‌های درهم‌تنیده: ${params.qubitCount}
   - درصد انتخاب مبنای اندازه‌گیری Rectilinear (+): ${params.rectilinearBasisPercent}%
   - درصد استراق سمع توسط Eve: ${params.eavesdropPercent}%
-  - نرخ خطای ذاتی کانال (QBER): ${params.qberPercent}%
+  - مدل نویز کانال: ${params.noiseModel === 'Depolarizing' ? 'کانال دپلاریزه' : 'خطای ساده (Bit-Flip)'}
+  - ${params.noiseModel === 'Depolarizing' ? 'احتمال دپلاریزه شدن' : 'نرخ خطای ذاتی کانال (QBER)'}: ${params.qberPercent}%
 
   **Simulation Results:**
   - طول کلید غربال شده (Sifted Key): ${result.siftedKeyLength}
@@ -59,9 +63,8 @@ const getE91Prompt = (params: SimulationParams, result: SimulationResult) => `
   1.  **تحلیل متنی (Textual Analysis):**
       - Provide a step-by-step explanation of the E91 protocol based on this simulation. Use Markdown for formatting.
       - Start by explaining the core concept of **quantum entanglement** and Bell states.
-      - Describe how Alice and Bob each receive one particle from an entangled pair and measure it.
-      - Explain that when their bases match, their results are perfectly correlated (or anti-correlated), forming the key.
-      - Analyze the "Measured QBER". Explain that in E91, **any eavesdropping by Eve breaks the entanglement**, which destroys the perfect correlations. This is immediately detectable as a high error rate and is the core security feature of E91.
+      - Analyze the "Measured QBER". Explain that in E91, **any eavesdropping by Eve breaks the entanglement**, and how channel noise also destroys the perfect correlations.
+      - Based on the selected noise model (${params.noiseModel}), explain its physical meaning. If it's "Depolarizing", contrast it with the simpler "SimpleQBER" (Bit-Flip) model and discuss why it's a more realistic simulation of environmental decoherence on one of the entangled particles.
       - Discuss the security of the final key, linking it conceptually to Bell's theorem.
       - Use LaTeX syntax for formulas.
 
@@ -69,8 +72,7 @@ const getE91Prompt = (params: SimulationParams, result: SimulationResult) => `
       - **You MUST use LaTeX for all mathematical notations.**
       - Start with a Bell state, for example, the singlet state: $$|\\Psi^-\\rangle = \\frac{1}{\\sqrt{2}}(|01\\rangle - |10\\rangle)$$.
       - Show that if Alice and Bob both measure in the same basis, their results are always anti-correlated.
-      - Now, describe Eve's attack: She intercepts a particle and measures it. Explain that this action **collapses the superposition** for the entire entangled system.
-      - Show that because the entanglement is broken, the results Alice and Bob get are no longer correlated, which they detect during their check.
+      - Now, describe Eve's attack: She intercepts a particle and measures it. Explain that this action **collapses the superposition** for the entire entangled system, which they detect.
 
   **Format your response as a single JSON object with two keys: "textual" and "mathematical". Do not include any text outside the JSON object.**
 `;
