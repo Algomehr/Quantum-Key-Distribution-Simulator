@@ -3,6 +3,47 @@ import { Basis, Protocol } from '../types';
 import type { SimulationResult, Qubit } from '../types';
 import { RectilinearIcon, DiagonalIcon, BitIcon, EveIcon, NoiseIcon } from './icons/BasisIcons';
 
+const SimulationLegend: React.FC = () => {
+  const legendItemClass = "flex items-center gap-2 text-xs text-gray-400";
+  return (
+    <div className="p-4 border-b border-brand-border">
+      <h4 className="text-sm font-bold text-white mb-3">راهنمای آیکون‌ها</h4>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-2">
+        <div className={legendItemClass}>
+          <RectilinearIcon /><span>مبنای Rectilinear</span>
+        </div>
+        <div className={legendItemClass}>
+          <DiagonalIcon /><span>مبنای Diagonal</span>
+        </div>
+        <div className={legendItemClass}>
+          <div className="flex items-center gap-1"><BitIcon bit={0} /> / <BitIcon bit={1} /></div><span>بیت ۰ / ۱</span>
+        </div>
+        <div className={legendItemClass}>
+          <EveIcon /><span>استراق سمع Eve</span>
+        </div>
+        <div className={legendItemClass}>
+          <NoiseIcon /><span>خطای کانال</span>
+        </div>
+        <div className={legendItemClass}>
+          <span className="text-green-400 text-lg">✓</span><span>تطابق مبنا</span>
+        </div>
+        <div className={legendItemClass}>
+          <span className="text-red-400 text-lg">✗</span><span>عدم تطابق مبنا</span>
+        </div>
+        <div className={legendItemClass}>
+          <span className="text-green-400 text-sm">(✓)</span><span>کلید مطابق</span>
+        </div>
+        <div className={legendItemClass}>
+          <span className="text-red-400 text-sm">(✗)</span><span>کلید نامطابق (خطا)</span>
+        </div>
+        <div className={legendItemClass}>
+          <div className="w-4 h-4 bg-white/10 rounded-sm opacity-40"></div><span>کیوبیت حذف شده</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const QubitLane: React.FC<{ qubit: Qubit, protocol: Protocol }> = ({ qubit, protocol }) => {
   const getBasisIcon = (basis: Basis) => {
     return basis === Basis.Rectilinear ? <RectilinearIcon /> : <DiagonalIcon />;
@@ -107,7 +148,8 @@ export const SimulationView: React.FC<{ result: SimulationResult | null, protoco
 
   return (
     <div className="glassmorphic rounded-2xl shadow-lg max-h-[80vh] overflow-y-auto">
-      <div className="sticky top-0 glassmorphic z-10 p-4 rounded-t-2xl">
+      <SimulationLegend />
+      <div className="sticky top-0 glassmorphic z-10 p-4">
         <div className="hidden md:flex items-center font-bold text-gray-300 text-sm border-b-2 border-brand-border pb-2">
           <div className="w-1/12 text-center">#</div>
           <div className="w-2/12 text-center">{isBB84 ? 'آلیس (ارسال)' : 'آلیس (اندازه‌گیری)'}</div>

@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { Protocol, SimulationParams, SimulationResult, LLMAnalysis, EducationalContent } from '../types';
+import type { Protocol, SimulationParams, SimulationResult, LLMAnalysis, EducationalContent, QuantumSetupExplanation } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -36,6 +36,8 @@ const getBB84Prompt = (params: SimulationParams, result: SimulationResult) => `
       - Provide a simplified, step-by-step mathematical walkthrough using one example qubit.
       - **You MUST use LaTeX for all mathematical notations.** Use notation like |0\\rangle, |+\\rangle.
       - Example: Alice sends $|0\\rangle$. Eve intercepts and measures in the 'x' basis, collapsing the state to a superposition: $$|0\\rangle = \\frac{1}{\\sqrt{2}}(|+\\rangle + |-\\rangle)$$. Show how this introduces errors.
+
+  **Important JSON Formatting Rule:** Inside the JSON string values, all backslashes (\\) in your LaTeX code MUST be escaped with another backslash. For example, to represent the LaTeX command \`\\frac\`, your JSON output string must contain \`\\\\frac\`. Similarly, \`|0\\rangle\` should be written as \`"|0\\\\rangle"\`.
 
   **Format your response as a single JSON object with two keys: "textual" and "mathematical". Do not include any text outside the JSON object.**
 `;
@@ -74,6 +76,8 @@ const getE91Prompt = (params: SimulationParams, result: SimulationResult) => `
       - Show that if Alice and Bob both measure in the same basis, their results are always anti-correlated.
       - Now, describe Eve's attack: She intercepts a particle and measures it. Explain that this action **collapses the superposition** for the entire entangled system, which they detect.
 
+  **Important JSON Formatting Rule:** Inside the JSON string values, all backslashes (\\) in your LaTeX code MUST be escaped with another backslash. For example, to represent the LaTeX command \`\\frac\`, your JSON output string must contain \`\\\\frac\`. Similarly, \`|0\\rangle\` should be written as \`"|0\\\\rangle"\`.
+
   **Format your response as a single JSON object with two keys: "textual" and "mathematical". Do not include any text outside the JSON object.**
 `;
 
@@ -108,6 +112,35 @@ const getEducationalPrompt = (protocol: Protocol) => `
       - Reassure the user that the security is backed by the laws of physics.
 
   **Format your response as a single JSON object with the specified keys. Do not include any text outside the JSON object.**
+`;
+
+const getQuantumSetupPrompt = (protocol: Protocol) => `
+  You are a quantum optics expert and science communicator, explaining experimental setups for QKD to a university student in Persian.
+
+  **Protocol to Explain:** ${protocol}
+
+  **Your Task:**
+  Describe the physical, experimental setup for this protocol. The output MUST be a single JSON object with the keys: "title", "overview", "components", and "process".
+
+  1.  **"title"**: A clear title for the setup, e.g., "سخت‌افزار آزمایشگاهی پروتکل BB84".
+
+  2.  **"overview"**: A brief, one-paragraph summary of how the physical setup works.
+
+  3.  **"components"**: An array of objects, each representing a key physical component in the setup.
+      - Each object must have three keys: "id" (a unique, machine-readable string like "laser-source" or "photon-detector"), "name" (a human-readable Persian name), and "description" (a concise, one or two-sentence explanation of the component's role).
+      - For **BB84**, include at least: 'laser-source', 'attenuator', 'alice-polarizer', 'quantum-channel', 'bob-polarizer', 'beam-splitter', 'photon-detectors'.
+      - For **E91**, include at least: 'entangled-source', 'quantum-channel', 'alice-polarizer', 'bob-polarizer', 'alice-detectors', 'bob-detectors', 'coincidence-counter'.
+
+  4.  **"process"**: A step-by-step walkthrough of what happens to a single qubit (or entangled pair) as it travels through the system. Use Markdown for formatting. Link to components using their names in bold.
+
+  **Example component for BB84:**
+  {
+    "id": "laser-source",
+    "name": "منبع لیزر",
+    "description": "یک پالس لیزر ضعیف تولید می‌کند که پس از تضعیف، به سطح تک فوتون می‌رسد."
+  }
+
+  **Format your response as a single, valid JSON object. Do not include any text outside the JSON object.**
 `;
 
 
@@ -161,6 +194,29 @@ export const getEducationalContent = async (protocol: Protocol): Promise<Educati
       prerequisites: "## خطا\n\nمتاسفانه در دریافت محتوای آموزشی خطایی رخ داد.",
       protocolSteps: "لطفا اتصال خود را بررسی کرده و دوباره تلاش کنید.",
       securityAnalysis: ""
+    }
+  }
+};
+
+export const getQuantumSetupExplanation = async (protocol: Protocol): Promise<QuantumSetupExplanation | null> => {
+  const prompt = getQuantumSetupPrompt(protocol);
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+      }
+    });
+    const jsonText = response.text.trim();
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error("Error calling Gemini API for quantum setup explanation:", error);
+    return {
+      title: "خطا در دریافت اطلاعات",
+      overview: "متاسفانه در دریافت توضیحات سخت‌افزار خطایی رخ داد. لطفا اتصال خود را بررسی کرده و دوباره تلاش کنید.",
+      components: [],
+      process: ""
     }
   }
 };

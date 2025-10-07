@@ -73,3 +73,17 @@ export interface LLMAnalysis {
   mathematical: string;
   educational?: EducationalContent;
 }
+
+// New types for Quantum Lab
+export interface QuantumComponent {
+  id: string; // e.g., 'laser-source'
+  name: string;
+  description: string;
+}
+
+export interface QuantumSetupExplanation {
+  title: string;
+  overview: string;
+  components: QuantumComponent[];
+  process: string;
+}
