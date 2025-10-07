@@ -14,16 +14,16 @@ const ProtocolSelector: React.FC<{
 }> = ({ selected, onChange }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-2">پروتکل</label>
-    <div className="flex bg-brand-surface p-1 rounded-lg border border-brand-border">
+    <div className="flex flex-col sm:flex-row bg-brand-surface p-1 rounded-lg border border-brand-border gap-1">
       <button
         onClick={() => onChange('BB84')}
-        className={`w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'BB84' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
+        className={`w-full sm:w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'BB84' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         BB84
       </button>
       <button
         onClick={() => onChange('E91')}
-        className={`w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'E91' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
+        className={`w-full sm:w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'E91' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         E91 (Entanglement)
       </button>
@@ -37,16 +37,16 @@ const NoiseModelSelector: React.FC<{
 }> = ({ selected, onChange }) => (
   <div>
     <label className="block text-sm font-medium text-gray-300 mb-2">مدل نویز کانال</label>
-    <div className="flex bg-brand-surface p-1 rounded-lg border border-brand-border">
+    <div className="flex flex-col sm:flex-row bg-brand-surface p-1 rounded-lg border border-brand-border gap-1">
       <button
         onClick={() => onChange('SimpleQBER')}
-        className={`w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'SimpleQBER' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
+        className={`w-full sm:w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'SimpleQBER' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         خطای ساده (Bit-Flip)
       </button>
       <button
         onClick={() => onChange('Depolarizing')}
-        className={`w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'Depolarizing' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
+        className={`w-full sm:w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'Depolarizing' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         کانال دپلاریزه
       </button>
@@ -94,7 +94,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ params, setParams, o
     : "نرخ خطای کوانتومی کانال (QBER)";
 
   return (
-    <div className="glassmorphic p-6 rounded-2xl shadow-lg space-y-6 sticky top-8">
+    <div className="glassmorphic p-6 rounded-2xl shadow-lg space-y-6 lg:sticky top-8">
       <h2 className="text-2xl font-bold text-center text-white">پارامترهای شبیه‌سازی</h2>
       
       <div className="space-y-4">

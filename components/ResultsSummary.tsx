@@ -52,13 +52,13 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({ result }) => {
 
   return (
     <div className="glassmorphic p-6 rounded-2xl shadow-lg">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-white">خلاصه نتایج آماری</h2>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
+        <h2 className="text-2xl font-semibold text-white text-center sm:text-left">خلاصه نتایج آماری</h2>
         <button
           onClick={handleExport}
-          className="px-4 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors duration-200 text-sm flex items-center gap-2"
+          className="w-full sm:w-auto px-4 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors duration-200 text-sm flex items-center justify-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
           خروجی CSV
         </button>
       </div>
