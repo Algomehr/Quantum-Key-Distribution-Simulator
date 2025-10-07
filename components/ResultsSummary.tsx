@@ -1,15 +1,15 @@
 import React from 'react';
-import type { AggregatedSimulationResult, Qubit } from '../types';
+import type { AggregatedSimulationResult } from '../types';
 
 interface ResultsSummaryProps {
   result: AggregatedSimulationResult;
 }
 
 const StatCard: React.FC<{ label: string; value: string; subtext?: string; className?: string }> = ({ label, value, subtext, className }) => (
-  <div className={`bg-gray-700 p-4 rounded-lg text-center ${className}`}>
+  <div className={`bg-brand-surface/50 p-4 rounded-lg text-center border border-brand-border transition-all duration-300 hover:bg-brand-surface/80 hover:border-cyan-400/50 ${className}`}>
     <p className="text-sm text-gray-400">{label}</p>
-    <p className="text-2xl font-bold text-cyan-300">{value}</p>
-    {subtext && <p className="text-xs text-gray-500">{subtext}</p>}
+    <p className="text-2xl font-bold text-brand-cyan font-mono">{value}</p>
+    {subtext && <p className="text-xs text-gray-500 mt-1">{subtext}</p>}
   </div>
 );
 
@@ -51,19 +51,20 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({ result }) => {
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+    <div className="glassmorphic p-6 rounded-2xl shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-white">خلاصه نتایج آماری</h2>
         <button
           onClick={handleExport}
-          className="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors duration-200"
+          className="px-4 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors duration-200 text-sm flex items-center gap-2"
         >
-          خروجی CSV (آخرین اجرا)
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          خروجی CSV
         </button>
       </div>
       {result.totalRuns > 1 && (
-        <p className="text-sm text-gray-400 mb-4 text-center">
-          نتایج زیر میانگین {result.totalRuns} بار تکرار شبیه‌سازی است.
+        <p className="text-sm text-gray-400 mb-4 text-center bg-brand-surface/50 py-2 px-4 rounded-md">
+          نتایج زیر میانگین <strong className="font-mono text-cyan-400">{result.totalRuns}</strong> بار تکرار شبیه‌سازی است.
         </p>
       )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

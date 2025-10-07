@@ -148,24 +148,34 @@ const App: React.FC = () => {
   const [aggregatedResult, setAggregatedResult] = useState<AggregatedSimulationResult | null>(null);
   const [analysis, setAnalysis] = useState<LLMAnalysis | null>(null);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [isTutorialLoading, setIsTutorialLoading] = useState<boolean>(true);
+  const [isTutorialLoading, setIsTutorialLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchTutorial = async () => {
-      setIsTutorialLoading(true);
-      setAnalysis(null); // Clear previous analysis
-      const content = await getEducationalContent(params.protocol);
-      if (content) {
+    // When protocol changes, clear old educational content so user can fetch the new one.
+    setAnalysis(prev => {
+        if (!prev) return null;
+        if (prev.textual || prev.mathematical) {
+            // Keep sim analysis, but remove tutorial
+            return {
+                textual: prev.textual,
+                mathematical: prev.mathematical
+            };
+        }
+        // No other analysis, so set the whole thing to null
+        return null;
+    });
+  }, [params.protocol]);
+
+  const handleFetchTutorial = useCallback(async () => {
+    setIsTutorialLoading(true);
+    const content = await getEducationalContent(params.protocol);
+    if (content) {
         setAnalysis(prev => ({
             ...prev,
-            textual: prev?.textual || '',
-            mathematical: prev?.mathematical || '',
             educational: content 
         }));
-      }
-      setIsTutorialLoading(false);
-    };
-    fetchTutorial();
+    }
+    setIsTutorialLoading(false);
   }, [params.protocol]);
 
 
@@ -217,14 +227,14 @@ const App: React.FC = () => {
   }, [params]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8 font-sans">
+    <div className="min-h-screen text-gray-300 p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-screen-2xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-cyan-300">
+        <header className="text-center mb-10">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-teal-400 pb-2">
             شبیه‌ساز توزیع کلید کوانتومی (QKD)
           </h1>
-          <p className="mt-2 text-lg text-gray-400">
-            پروتکل‌های BB84 و E91 را با پارامترهای مختلف آزمایش کنید و تحلیل آن را مشاهده نمایید.
+          <p className="mt-2 text-lg text-gray-400 max-w-3xl mx-auto">
+            پروتکل‌های <strong className="font-semibold text-cyan-400">BB84</strong> و <strong className="font-semibold text-cyan-400">E91</strong> را با پارامترهای مختلف آزمایش کنید و تحلیل آن را با کمک هوش مصنوعی مشاهده نمایید.
           </p>
         </header>
 
@@ -249,6 +259,7 @@ const App: React.FC = () => {
                     isTutorialLoading={isTutorialLoading}
                     params={params} 
                     result={aggregatedResult?.lastRun ?? null} 
+                    onFetchTutorial={handleFetchTutorial}
                 />
                 </section>
             </div>

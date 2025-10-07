@@ -12,18 +12,18 @@ const ProtocolSelector: React.FC<{
   selected: Protocol;
   onChange: (protocol: Protocol) => void;
 }> = ({ selected, onChange }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-300">پروتکل</label>
-    <div className="grid grid-cols-2 gap-2">
+  <div>
+    <label className="block text-sm font-medium text-gray-300 mb-2">پروتکل</label>
+    <div className="flex bg-brand-surface p-1 rounded-lg border border-brand-border">
       <button
         onClick={() => onChange('BB84')}
-        className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${selected === 'BB84' ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
+        className={`w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'BB84' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         BB84
       </button>
       <button
         onClick={() => onChange('E91')}
-        className={`px-3 py-2 text-sm font-bold rounded-md transition-colors ${selected === 'E91' ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
+        className={`w-1/2 px-3 py-2 text-sm font-bold rounded-md transition-all duration-300 ${selected === 'E91' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         E91 (Entanglement)
       </button>
@@ -35,18 +35,18 @@ const NoiseModelSelector: React.FC<{
   selected: NoiseModel;
   onChange: (model: NoiseModel) => void;
 }> = ({ selected, onChange }) => (
-  <div className="space-y-2">
-    <label className="block text-sm font-medium text-gray-300">مدل نویز کانال</label>
-    <div className="grid grid-cols-2 gap-2">
+  <div>
+    <label className="block text-sm font-medium text-gray-300 mb-2">مدل نویز کانال</label>
+    <div className="flex bg-brand-surface p-1 rounded-lg border border-brand-border">
       <button
         onClick={() => onChange('SimpleQBER')}
-        className={`px-3 py-2 text-sm rounded-md transition-colors ${selected === 'SimpleQBER' ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
+        className={`w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'SimpleQBER' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         خطای ساده (Bit-Flip)
       </button>
       <button
         onClick={() => onChange('Depolarizing')}
-        className={`px-3 py-2 text-sm rounded-md transition-colors ${selected === 'Depolarizing' ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}
+        className={`w-1/2 px-3 py-2 text-sm rounded-md transition-all duration-300 ${selected === 'Depolarizing' ? 'bg-cyan-600 text-white shadow-md' : 'text-gray-400 hover:bg-white/10'}`}
       >
         کانال دپلاریزه
       </button>
@@ -59,7 +59,7 @@ const Slider = ({ label, value, onChange, min = 0, max = 100, step = 1, unit = '
   <div className="space-y-2">
     <label className="flex justify-between text-sm font-medium text-gray-300">
       <span>{label}</span>
-      <span className="font-mono text-cyan-300">{value.toLocaleString()}{unit}</span>
+      <span className="font-mono text-brand-cyan">{value.toLocaleString()}{unit}</span>
     </label>
     <input
       type="range"
@@ -68,29 +68,8 @@ const Slider = ({ label, value, onChange, min = 0, max = 100, step = 1, unit = '
       step={step}
       value={value}
       onChange={onChange}
-      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-thumb-cyan"
-      style={{
-        '--thumb-color': '#22d3ee'
-      } as React.CSSProperties}
+      className="w-full h-2 bg-brand-surface rounded-lg appearance-none cursor-pointer range-thumb-cyan"
     />
-     <style>{`
-        .range-thumb-cyan::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          background: var(--thumb-color);
-          cursor: pointer;
-          border-radius: 50%;
-        }
-        .range-thumb-cyan::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
-          background: var(--thumb-color);
-          cursor: pointer;
-          border-radius: 50%;
-        }
-      `}</style>
   </div>
 );
 
@@ -115,59 +94,61 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ params, setParams, o
     : "نرخ خطای کوانتومی کانال (QBER)";
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 space-y-6">
+    <div className="glassmorphic p-6 rounded-2xl shadow-lg space-y-6 sticky top-8">
       <h2 className="text-2xl font-bold text-center text-white">پارامترهای شبیه‌سازی</h2>
       
-      <ProtocolSelector 
-        selected={params.protocol}
-        onChange={(p) => handleParamChange('protocol', p)}
-      />
+      <div className="space-y-4">
+        <ProtocolSelector 
+          selected={params.protocol}
+          onChange={(p) => handleParamChange('protocol', p)}
+        />
 
-      <NoiseModelSelector
-        selected={params.noiseModel}
-        onChange={(m) => handleParamChange('noiseModel', m)}
-      />
-      
-      <Slider 
-        label="تعداد کیوبیت‌ها / جفت‌ها"
-        value={params.qubitCount}
-        min={50}
-        max={5000}
-        step={50}
-        onChange={(e) => handleParamChange('qubitCount', parseInt(e.target.value))}
-      />
-      <Slider 
-        label="تعداد تکرار شبیه‌سازی"
-        value={params.runCount}
-        min={1}
-        max={100}
-        onChange={(e) => handleParamChange('runCount', parseInt(e.target.value))}
-      />
+        <NoiseModelSelector
+          selected={params.noiseModel}
+          onChange={(m) => handleParamChange('noiseModel', m)}
+        />
+        
+        <Slider 
+          label="تعداد کیوبیت‌ها / جفت‌ها"
+          value={params.qubitCount}
+          min={50}
+          max={5000}
+          step={50}
+          onChange={(e) => handleParamChange('qubitCount', parseInt(e.target.value))}
+        />
+        <Slider 
+          label="تعداد تکرار شبیه‌سازی"
+          value={params.runCount}
+          min={1}
+          max={100}
+          onChange={(e) => handleParamChange('runCount', parseInt(e.target.value))}
+        />
 
-      <Slider 
-        label={basisLabel}
-        value={params.rectilinearBasisPercent}
-        unit="%"
-        onChange={(e) => handleParamChange('rectilinearBasisPercent', parseInt(e.target.value))}
-      />
-      <Slider 
-        label="درصد استراق سمع (Eve)"
-        value={params.eavesdropPercent}
-        unit="%"
-        onChange={(e) => handleParamChange('eavesdropPercent', parseInt(e.target.value))}
-      />
-      <Slider 
-        label={noiseLabel}
-        value={params.qberPercent}
-        unit="%"
-        max={params.noiseModel === 'Depolarizing' ? 50 : 100}
-        onChange={(e) => handleParamChange('qberPercent', parseInt(e.target.value))}
-      />
+        <Slider 
+          label={basisLabel}
+          value={params.rectilinearBasisPercent}
+          unit="%"
+          onChange={(e) => handleParamChange('rectilinearBasisPercent', parseInt(e.target.value))}
+        />
+        <Slider 
+          label="درصد استراق سمع (Eve)"
+          value={params.eavesdropPercent}
+          unit="%"
+          onChange={(e) => handleParamChange('eavesdropPercent', parseInt(e.target.value))}
+        />
+        <Slider 
+          label={noiseLabel}
+          value={params.qberPercent}
+          unit="%"
+          max={params.noiseModel === 'Depolarizing' ? 50 : 100}
+          onChange={(e) => handleParamChange('qberPercent', parseInt(e.target.value))}
+        />
+      </div>
 
       <button 
         onClick={onStart}
         disabled={isLoading}
-        className="w-full px-4 py-3 font-bold text-white transition duration-300 bg-cyan-600 rounded-lg hover:bg-cyan-700 disabled:bg-gray-500 disabled:cursor-not-allowed transform hover:scale-105"
+        className="w-full px-4 py-3 font-bold text-white transition-all duration-300 bg-cyan-600 rounded-lg shadow-lg hover:bg-cyan-500 hover:shadow-cyan-500/50 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed transform hover:scale-105"
       >
         {isLoading ? 'در حال تحلیل...' : startButtonText}
       </button>
