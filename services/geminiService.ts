@@ -127,17 +127,42 @@ const getQuantumSetupPrompt = (protocol: Protocol) => `
   2.  **"overview"**: A brief, one-paragraph summary of how the physical setup works.
 
   3.  **"components"**: An array of objects, each representing a key physical component in the setup.
-      - Each object must have three keys: "id" (a unique, machine-readable string like "laser-source" or "photon-detector"), "name" (a human-readable Persian name), and "description" (a concise, one or two-sentence explanation of the component's role).
-      - For **BB84**, include at least: 'laser-source', 'attenuator', 'alice-polarizer', 'quantum-channel', 'bob-polarizer', 'beam-splitter', 'photon-detectors'.
-      - For **E91**, include at least: 'entangled-source', 'quantum-channel', 'alice-polarizer', 'bob-polarizer', 'alice-detectors', 'bob-detectors', 'coincidence-counter'.
+      - Each object must have five keys: "id", "name", "description", "ports", and "configurableProperties".
+      - **"id"**: a unique, machine-readable string like "laser-source".
+      - **"name"**: a human-readable Persian name.
+      - **"description"**: a concise, one or two-sentence explanation of the component's role.
+      - **"ports"**: An array of port objects. Each port object must have "id" (e.g., "in1", "out_h"), "type" ("input" or "output"), and "name" (a short Persian label like "ورودی" or "خروجی H").
+      - **"configurableProperties"**: An array of objects defining UI controls. Each object has "id", "label", "type" ('toggle' or 'select'), and optional "options".
+      - For **BB84**, include: 'laser-source' (configurable "power"), 'alice-polarizer' (configurable "basis"), 'bob-polarizer' (configurable "basis"), 'photon-detectors'.
+      - For **E91**, include: 'entangled-source', 'alice-polarizer' (configurable "basis"), 'bob-polarizer' (configurable "basis"), 'alice-detectors', 'bob-detectors'.
 
   4.  **"process"**: A step-by-step walkthrough of what happens to a single qubit (or entangled pair) as it travels through the system. Use Markdown for formatting. Link to components using their names in bold.
 
-  **Example component for BB84:**
+  **Example component for BB84's Polarizer:**
+  {
+    "id": "alice-polarizer",
+    "name": "قطبشگر آلیس",
+    "description": "قطبش فوتون‌های ورودی را برای کدگذاری بیت‌ها بر اساس مبنای انتخاب شده، تنظیم می‌کند.",
+    "ports": [
+      { "id": "in", "type": "input", "name": "ورودی" },
+      { "id": "out", "type": "output", "name": "خروجی" }
+    ],
+    "configurableProperties": [
+       { "id": "basis", "label": "مبنای ارسال", "type": "select", "options": ["+", "x"] }
+    ]
+  }
+  
+  **Example for Laser:**
   {
     "id": "laser-source",
-    "name": "منبع لیزر",
-    "description": "یک پالس لیزر ضعیف تولید می‌کند که پس از تضعیف، به سطح تک فوتون می‌رسد."
+    "name": "منبع لیزر تک فوتونی",
+    "description": "پالس‌های ضعیف لیزر را تولید می‌کند که به طور میانگین حاوی یک فوتون در هر پالس هستند.",
+    "ports": [
+      { "id": "out", "type": "output", "name": "خروجی" }
+    ],
+    "configurableProperties": [
+      { "id": "power", "label": "روشن/خاموش", "type": "toggle" }
+    ]
   }
 
   **Format your response as a single, valid JSON object. Do not include any text outside the JSON object.**

@@ -322,6 +322,19 @@ const App: React.FC = () => {
       <div className="max-w-screen-2xl mx-auto">
         <Header currentView={view} setView={setView} />
         {renderView()}
+        <footer className="text-center py-8 mt-12 text-sm text-gray-500 border-t border-brand-border">
+          <p>
+            توسعه یافته توسط{' '}
+            <a
+              href="https://mehrdad.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-gray-400 hover:text-brand-cyan transition-colors"
+            >
+              مهرداد رجبی
+            </a>
+          </p>
+        </footer>
       </div>
     </div>
   );

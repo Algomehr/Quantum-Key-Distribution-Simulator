@@ -74,11 +74,26 @@ export interface LLMAnalysis {
   educational?: EducationalContent;
 }
 
-// New types for Quantum Lab
+// Types for Quantum Lab
+export interface Port {
+  id: string; // e.g., 'in1', 'out_h'
+  type: 'input' | 'output';
+  name: string; // Persian label e.g., 'ورودی'
+}
+
+export interface ConfigurableProperty {
+    id: string; // e.g. 'basis'
+    label: string; // e.g. 'مبنا'
+    type: 'toggle' | 'select';
+    options?: string[]; // e.g. ['+', 'x']
+}
+
 export interface QuantumComponent {
   id: string; // e.g., 'laser-source'
   name: string;
   description: string;
+  ports: Port[];
+  configurableProperties?: ConfigurableProperty[];
 }
 
 export interface QuantumSetupExplanation {
@@ -86,4 +101,37 @@ export interface QuantumSetupExplanation {
   overview: string;
   components: QuantumComponent[];
   process: string;
+}
+
+export interface ComponentConfig {
+    [key: string]: any; // e.g. { power: 'on', basis: '+' }
+}
+
+export interface PlacedComponent {
+  instanceId: string;
+  component: QuantumComponent;
+  x: number;
+  y: number;
+  config: ComponentConfig;
+}
+
+export interface Connection {
+  id: string;
+  from: {
+    instanceId: string;
+    portId: string;
+  };
+  to: {
+    instanceId: string;
+    portId: string;
+  };
+}
+
+export type SimulationState = 'stopped' | 'running' | 'paused';
+
+export interface SimulationLog {
+  id: number;
+  timestamp: number;
+  message: string;
+  type: 'info' | 'success' | 'error' | 'photon';
 }
